@@ -8,6 +8,13 @@ console.log(output);
 
 /* SOLUTION */
 function calibrate(input) {
+  return input.split("\n").reduce((sum, line) => {
+    const digits = getDigitsOr(line, [0]);
+    return sum + parseInt([digits[0], digits.pop()].join(""));
+  }, 0);
+}
+
+function getDigitsOr(line, fallback) {
   const rules = [
     { matches: ["zero", "0"], then: 0 },
     { matches: ["one", "1"], then: 1 },
@@ -21,18 +28,13 @@ function calibrate(input) {
     { matches: ["nine", "9"], then: 9 },
   ];
 
-  return input.split("\n").reduce((sum, line) => {
-    let firstNum, lastNum;
-    for (let i = 0; i < line.length; ++i) {
-      const rule = rules.find(({ matches }) =>
-        matches.some((val) => line.startsWith(val, i)),
-      );
-      if (!rule) continue;
+  const digits = [];
+  for (let i = 0; i < line.length; ++i) {
+    const rule = rules.find(({ matches }) =>
+      matches.some((val) => line.startsWith(val, i)),
+    );
 
-      lastNum = rule.then;
-      if (firstNum === undefined) firstNum = lastNum;
-    }
-
-    return sum + parseInt(`${firstNum || 0}${lastNum || 0}`);
-  }, 0);
+    if (rule) digits.push(rule.then);
+  }
+  return digits.length ? digits : fallback;
 }
