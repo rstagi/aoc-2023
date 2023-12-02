@@ -36,7 +36,7 @@ To write new solutions, you can add a new folder in the repository root and plac
 
 The `index.js` file should return two functions `solve1` and `solve2`, which receives an input array of lines read by the input file, and returns the solution for the given challenge.
 
-For example, let's assume you have the following solution file inside `day0/index.js`:
+For example, let's assume you have the following solution file inside `dayN/index.js`:
 ```js
 module.exports = {
   // add all numbers
@@ -46,7 +46,7 @@ module.exports = {
 }
 ```
 
-Given the following input file `day0/input.txt`:
+Given the following input file `dayN/input.txt`:
 ```
 1
 2
@@ -57,11 +57,13 @@ Given the following input file `day0/input.txt`:
 
 The output result will be:
 ```sh
-$ npm start day0
+$ npm start dayN
 
 > aoc-2023@1.0.0 start
-> node run.js day0
+> node run.js dayN
 
 solve1 result:  15 
 solve2 result:  120
 ```
+
+To kick-off a new day, you can simply copy and paste the folder `day0` to a new folder `dayN` and start modifying the `solve1` and `solve2` fuctions.
