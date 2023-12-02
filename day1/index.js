@@ -1,14 +1,11 @@
-const fs = require("fs");
+const { readLines } = require("../shared/utils");
 
-const INPUT_FILE = "input.txt";
-
-const input = fs.readFileSync(`${__dirname}/${INPUT_FILE}`, "utf8");
-const output = calibrate(input);
-console.log(output);
+const result = solve(readLines());
+console.log(result);
 
 /* SOLUTION */
-function calibrate(input) {
-  return input.split("\n").reduce((sum, line) => {
+function solve(input) {
+  return input.reduce((sum, line) => {
     const digits = getDigitsOr(line, [0]);
     return sum + parseInt([digits[0], digits.pop()].join(""));
   }, 0);
