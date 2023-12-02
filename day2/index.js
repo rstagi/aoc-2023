@@ -1,15 +1,6 @@
-const { readLines } = require("../shared/utils");
+const { run } = require("../shared/utils");
 
-const result = solve(readLines());
-console.log(result);
-
-/* SOLUTION */
-function solve(input) {
-  return {
-    challenge1: solve1(input),
-    challenge2: solve2(input),
-  };
-}
+run(solve1, solve2);
 
 /* CHALLENGE 1 */
 function solve1(input) {
