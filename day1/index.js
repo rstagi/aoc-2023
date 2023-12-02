@@ -1,7 +1,3 @@
-const { run } = require("../shared/utils");
-
-run(solve1, solve2);
-
 function solve1(input) {
   return input.reduce((sum, line) => {
     const rules = [
@@ -51,3 +47,5 @@ function getDigitsOr(line, rules, fallback) {
   }
   return digits.length ? digits : fallback;
 }
+
+module.exports = { solve1, solve2 };

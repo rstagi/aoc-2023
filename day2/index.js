@@ -1,7 +1,3 @@
-const { run } = require("../shared/utils");
-
-run(solve1, solve2);
-
 /* CHALLENGE 1 */
 function solve1(input) {
   return input.reduce((sum, line) => {
@@ -87,3 +83,5 @@ function getInfo(line) {
     },
   };
 }
+
+module.exports = { solve1, solve2 };
