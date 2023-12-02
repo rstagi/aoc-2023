@@ -1,4 +1,4 @@
-# aoc-2023
+# Advent Of Code 2023
 
 To run one of the solutions, run the following command:
 ```sh
