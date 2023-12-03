@@ -1,62 +1,121 @@
 /* CHALLENGE 1 */
 function solve1(input) {
-  const { partNumbers } = getEngineSpecs(input);
-  return partNumbers.reduce((sum, num) => sum + num, 0);
+  const { numbers, symbols } = parseInput(input);
+
+  const symbolsAroundLine = (index) => elementsAroundLine(index, symbols);
+  const withSymbolsAround = (number) =>
+    symbolsAroundLine(number.line).some(isAround(number.range));
+
+  const parts = numbers.filter(withSymbolsAround);
+
+  return parts.reduce(sum("value"), 0);
 }
 
 /* CHALLENGE 2 */
-function solve2(input) {}
+function solve2(input) {
+  const { symbols, numbers } = parseInput(input);
 
-function getEngineSpecs(input) {
-  const isSymbol = (i, j) =>
-    Boolean(
-      0 <= i &&
-        i < input.length &&
-        0 <= j &&
-        j < input[i].length &&
-        isNaN(parseInt(input[i][j])) &&
-        input[i][j] !== ".",
-    );
+  const numbersAroundLine = (index) => elementsAroundLine(index, numbers);
+  const addCloseNumbers = (symbolInfo) => ({
+    ...symbolInfo,
+    numbersAroundSymbol: numbersAroundLine(symbolInfo.line).filter((num) =>
+      isPosAroundRange(symbolInfo.pos, num.range),
+    ),
+  });
 
-  const isCloseToSymbol = (i, j) =>
-    isSymbol(i - 1, j - 1) ||
-    isSymbol(i - 1, j) ||
-    isSymbol(i - 1, j + 1) ||
-    isSymbol(i, j - 1) ||
-    isSymbol(i, j + 1) ||
-    isSymbol(i + 1, j - 1) ||
-    isSymbol(i + 1, j) ||
-    isSymbol(i + 1, j + 1);
+  const gears = symbols
+    .filter(hasGearSymbol)
+    .map(addCloseNumbers)
+    .filter(isGear)
+    .map(calcRatio);
 
-  const partNumbers = [];
+  return gears.reduce(sum("ratio"), 0);
+}
 
-  for (let i = 0; i < input.length; i++) {
-    let isInNumber = false,
-      isNumberCloseToSymbol = false;
-    const currNum = [];
-    for (let j = 0; j < input[i].length; j++) {
-      if (!isNaN(parseInt(input[i][j]))) {
-        currNum.push(input[i][j]);
-        isInNumber = true;
-      } else {
-        if (isInNumber && isNumberCloseToSymbol) {
-          partNumbers.push(parseInt(currNum.join("")));
-        }
-        currNum.splice(0, currNum.length);
-        isInNumber = false;
-        isNumberCloseToSymbol = false;
-        continue;
+function hasGearSymbol(symbolInfo) {
+  return symbolInfo.symbol === "*";
+}
+
+function isGear(potentialGear) {
+  return potentialGear.numbersAroundSymbol.length === 2;
+}
+
+function calcRatio(gear) {
+  const [n1, n2] = gear.numbersAroundSymbol;
+  return {
+    ...gear,
+    ratio: n1.value * n2.value,
+  };
+}
+
+/* SHARED */
+
+/* Input parsing */
+function parseInput(input) {
+  const numbers = input.flatMap(numbersInLine);
+  const symbols = input.flatMap(symbolsInLine);
+  return { numbers, symbols };
+}
+
+function numbersInLine(line, index) {
+  const foundNumbers = [];
+
+  let currNumDigits = [];
+  for (let i = 0; i < line.length; i++) {
+    if (!isNaN(parseInt(line[i]))) {
+      currNumDigits.push(line[i]);
+    } else {
+      if (currNumDigits.length) {
+        foundNumbers.push(
+          numberInfo(i - currNumDigits.length, currNumDigits, index),
+        );
+        currNumDigits = [];
       }
-
-      isNumberCloseToSymbol |= isCloseToSymbol(i, j);
-    }
-
-    if (isInNumber && isNumberCloseToSymbol) {
-      partNumbers.push(parseInt(currNum.join("")));
     }
   }
+  if (currNumDigits.length) {
+    foundNumbers.push(
+      numberInfo(line.length - currNumDigits.length, currNumDigits, index),
+    );
+  }
+  return foundNumbers;
+}
 
-  return { partNumbers };
+function numberInfo(startsAt, digits, lineIndex) {
+  return {
+    value: parseInt(digits.join("")),
+    range: [startsAt, startsAt + digits.length - 1],
+    line: lineIndex,
+  };
+}
+
+function symbolsInLine(line, index) {
+  const foundSymbols = [];
+  for (let i = 0; i < line.length; i++) {
+    if (isNaN(parseInt(line[i])) && line[i] !== ".") {
+      foundSymbols.push({ line: index, pos: i, symbol: line[i] });
+    }
+  }
+  return foundSymbols;
+}
+
+/* Utils */
+function sum(field) {
+  return (sum, el) => sum + el[field];
+}
+
+function elementsAroundLine(index, elementsList) {
+  return elementsList.filter(
+    (el) => index - 1 <= el.line && el.line <= index + 1,
+  );
+}
+
+function isAround([start, end]) {
+  return ({ pos }) => isPosAroundRange(pos, [start, end]);
+}
+
+function isPosAroundRange(pos, [start, end]) {
+  return start - 1 <= pos && pos <= end + 1;
 }
 
 module.exports = { solve1, solve2 };
