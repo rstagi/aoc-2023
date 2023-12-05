@@ -4,7 +4,8 @@
   "description": "",
   "main": "run.js",
   "scripts": {
-    "start": "node run.js"
+    "start": "node run.js",
+    "newday": "cp -r day0 day$((`ls -d day* | wc -l`))"
   },
   "keywords": [],
   "author": "",

@@ -1,5 +1,5 @@
 const folder = process.argv[2];
-const inputFile = process.env.npm_config_input || `${folder}/input.txt`;
+const inputFile = process.argv[3] || `${folder}/input.txt`;
 
 const solutions = require(`./${folder}/index.js`);
 const { solve1 = () => {}, solve2 = () => {} } = solutions;
