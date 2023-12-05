@@ -1,5 +1,5 @@
 /* CHALLENGE 1 */
-function solve1(input) {
+function solve1(input: string[]) {
   const { numbers, symbols } = parseInput(input);
 
   const symbolsAroundLine = (index) => elementsAroundLine(index, symbols);

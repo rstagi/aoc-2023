@@ -1,6 +1,6 @@
-function solve1(input) {
+function solve1(input: string[]) {
   return input.reduce((sum, line) => {
-    const rules = [
+    const rules: Rule[] = [
       { matches: ["0"], then: 0 },
       { matches: ["1"], then: 1 },
       { matches: ["2"], then: 2 },
@@ -17,7 +17,7 @@ function solve1(input) {
   }, 0);
 }
 
-function solve2(input) {
+function solve2(input: string[]) {
   return input.reduce((sum, line) => {
     const rules = [
       { matches: ["zero", "0"], then: 0 },
@@ -36,8 +36,12 @@ function solve2(input) {
   }, 0);
 }
 
-function getDigitsOr(line, rules, fallback) {
-  const digits = [];
+type Rule = {
+  matches: string[];
+  then: number;
+};
+function getDigitsOr(line: string, rules: Rule[], fallback: number[]) {
+  const digits = <number[]>[];
   for (let i = 0; i < line.length; ++i) {
     const rule = rules.find(({ matches }) =>
       matches.some((val) => line.startsWith(val, i)),

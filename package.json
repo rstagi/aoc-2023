@@ -4,10 +4,14 @@
   "description": "",
   "main": "run.js",
   "scripts": {
-    "start": "node run.js",
+    "start": "ts-node run.ts",
     "newday": "cp -r day0 day$((`ls -d day* | wc -l`))"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
+  }
 }
