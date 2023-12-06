@@ -1,3 +1,4 @@
+import { listOfNums, toSingleNum } from "../utils/input";
 import { mul } from "../utils/reducers";
 
 /* CHALLENGE 1 */
@@ -16,10 +17,7 @@ function solve1(input: string[]) {
 function solve2(input: string[]) {
   const { times, distances } = readInput(input);
 
-  let ways = calcTotalWays(
-    parseInt(times.join("")),
-    parseInt(distances.join("")),
-  );
+  let ways = calcTotalWays(toSingleNum(times), toSingleNum(distances));
 
   return ways;
 }
@@ -27,18 +25,8 @@ function solve2(input: string[]) {
 /* SHARED */
 function readInput(input: string[]) {
   return {
-    times: input[0]
-      .split(": ")[1]
-      .trim()
-      .split(" ")
-      .map((n) => parseInt(n))
-      .filter((n) => !isNaN(n)),
-    distances: input[1]
-      .split(": ")[1]
-      .trim()
-      .split(" ")
-      .map((n) => parseInt(n))
-      .filter((n) => !isNaN(n)),
+    times: listOfNums(input[0].split(": ")[1]),
+    distances: listOfNums(input[1].split(": ")[1]),
   };
 }
 

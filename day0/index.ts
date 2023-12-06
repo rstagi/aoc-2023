@@ -1,3 +1,6 @@
+import * as __input from "../utils/input";
+import * as __reducers from "../utils/reducers";
+
 /* CHALLENGE 1 */
 export function solve1(input: string[]) {
   const parsedInput = parseInput(input);
