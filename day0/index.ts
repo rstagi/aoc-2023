@@ -23,3 +23,10 @@ export function solve2(input: string[]) {
 function parseInput(input: string[]) {
   return input;
 }
+
+export const __forceInput = {
+  force: true,
+  input: `
+
+`.trim(),
+};
