@@ -5,7 +5,7 @@
   "main": "run.js",
   "scripts": {
     "start": "ts-node run.ts",
-    "newday": "cp -r day0 day$((`ls -d day* | wc -l`))"
+    "newday": "ts-node newday.ts"
   },
   "keywords": [],
   "author": "",

@@ -20,6 +20,7 @@ export function solve2(input: string[]) {
 }
 
 /* SHARED */
+// Parse the input into a usable format. An example of input is provided below in the __forceInput.input variable.
 function parseInput(input: string[]) {
   return input;
 }
