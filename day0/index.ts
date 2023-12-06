@@ -1,7 +1,22 @@
 /* CHALLENGE 1 */
-function solve1(input: string[]) {}
+export function solve1(input: string[]) {
+  const parsedInput = parseInput(input);
+  console.log(parsedInput);
+  const {} = parseInput;
+
+  return 42;
+}
 
 /* CHALLENGE 2 */
-function solve2(input: string[]) {}
+export function solve2(input: string[]) {
+  const parsedInput = parseInput(input);
+  console.log(parsedInput);
+  const {} = parseInput;
 
-module.exports = { solve1, solve2 };
+  return 42;
+}
+
+/* SHARED */
+function parseInput(input: string[]) {
+  return input;
+}
