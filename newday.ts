@@ -20,6 +20,8 @@ exec(
 );
 console.log("Input fetched");
 
+exec(`open https://adventofcode.com/2023/day/${day}`);
+
 function getNextDayFromDir() {
   return (
     fs

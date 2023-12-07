@@ -7,5 +7,5 @@ export function listOfNums(line: string, separator = " ") {
 }
 
 export function toSingleNum(nums: (string | number)[]) {
-  return parseInt(nums.join(""));
+  return parseInt(nums.filter((n) => !isNaN(n as number)).join(""));
 }
