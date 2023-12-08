@@ -6,7 +6,7 @@ import * as __sorters from "../utils/sorters";
 export function solve1(input: string[]) {
   const parsedInput = parseInput(input);
   console.log(parsedInput);
-  const {} = parseInput;
+  const {} = parsedInput;
 
   return 42;
 }
@@ -14,8 +14,8 @@ export function solve1(input: string[]) {
 /* CHALLENGE 2 */
 export function solve2(input: string[]) {
   const parsedInput = parseInput(input);
-  console.log(parsedInput);
-  const {} = parseInput;
+  // console.log(parsedInput);
+  const {} = parsedInput;
 
   return 42;
 }

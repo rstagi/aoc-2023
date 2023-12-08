@@ -1,27 +1,18 @@
 import * as __input from "../utils/input";
 import * as __reducers from "../utils/reducers";
 import * as __sorters from "../utils/sorters";
+import * as __math from "../utils/math";
 
 /* CHALLENGE 1 */
 export function solve1(input: string[]) {
   const parsedInput = parseInput(input);
   const { directions, nodes } = parsedInput;
-
-  let i = 0,
-    currNode = "AAA",
-    steps = 0;
-  while (currNode !== "ZZZ") {
-    const direction = directions[i];
-    if (direction === "R") {
-      currNode = nodes[currNode].right;
-    } else if (direction === "L") {
-      currNode = nodes[currNode].left;
-    }
-    steps += 1;
-    i = (i + 1) % directions.length;
-  }
-
-  return steps;
+  return countRequiredSteps({
+    nodes,
+    directions,
+    startAt: "AAA",
+    endAt: "ZZZ",
+  });
 }
 
 /* CHALLENGE 2 */
@@ -29,46 +20,23 @@ export function solve2(input: string[]) {
   const parsedInput = parseInput(input);
   const { directions, nodes } = parsedInput;
 
-  let i = 0,
-    currNodes = Object.keys(nodes).filter((n) => n.endsWith("A"));
+  // the start nodes are all the nodes that end with A
+  const startNodes = Object.keys(nodes).filter((n) => n.endsWith("A"));
 
-  const stepsForEachNode = currNodes.map((n) => {
-    let steps = 0,
-      currNode = n;
-    while (!currNode.endsWith("Z")) {
-      const direction = directions[i];
-      if (direction === "R") {
-        currNode = nodes[currNode].right;
-      } else if (direction === "L") {
-        currNode = nodes[currNode].left;
-      }
-      steps += 1;
-      i = (i + 1) % directions.length;
-    }
-    return steps;
-  });
-
-  const minSteps = stepsForEachNode.reduce(
-    (r, n) => lcm(n, r),
-    stepsForEachNode[0],
+  // we need to find the number of steps to get to an end node from each start node
+  const stepsForEachPath = startNodes.map((n) =>
+    countRequiredSteps({
+      nodes,
+      directions,
+      startAt: n,
+      // an end node is a node that ends with Z
+      endAt: (node) => node.endsWith("Z"),
+    }),
   );
 
+  // the min number of steps is the LCM of all the steps for each path from A to Z
+  const minSteps = stepsForEachPath.reduce(...__reducers.lcm);
   return minSteps;
-}
-
-function lcm(x: number, y: number) {
-  return (x * y) / gcd(x, y);
-}
-
-function gcd(x: number, y: number) {
-  x = Math.abs(x);
-  y = Math.abs(y);
-  while (y) {
-    var t = y;
-    y = x % y;
-    x = t;
-  }
-  return x;
 }
 
 /* SHARED */
@@ -76,9 +44,8 @@ function gcd(x: number, y: number) {
 function parseInput(input: string[]) {
   const directions = input[0];
 
-  input.splice(0, 2);
   const nodes = {};
-  for (let i = 0; i < input.length; ++i) {
+  for (let i = 2; i < input.length; ++i) {
     const [name, value] = input[i].split(" = ");
     if (!name || !value) continue;
     const [left, right] = value
@@ -88,6 +55,34 @@ function parseInput(input: string[]) {
   }
 
   return { directions, nodes };
+}
+
+type NodeMap = Record<string, { left: string; right: string }>;
+function countRequiredSteps(opts: {
+  nodes: NodeMap;
+  directions: string;
+  startAt: string;
+  endAt: string | ((node: string) => boolean);
+}) {
+  const { nodes, directions, startAt, endAt } = opts;
+
+  const endCondition =
+    typeof endAt === "string" ? (node: string) => node === endAt : endAt;
+
+  let i = 0,
+    steps = 0,
+    currNode = startAt;
+  while (!endCondition(currNode)) {
+    const direction = directions[i];
+    if (direction === "R") {
+      currNode = nodes[currNode].right;
+    } else if (direction === "L") {
+      currNode = nodes[currNode].left;
+    }
+    steps += 1;
+    i = (i + 1) % directions.length;
+  }
+  return steps;
 }
 
 export const __forceInput = {
