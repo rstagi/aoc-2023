@@ -5,66 +5,74 @@ import * as __sorters from "../utils/sorters";
 /* CHALLENGE 1 */
 export function solve1(input: string[]) {
   const parsedInput = parseInput(input);
-
-  const interpolated = parsedInput.map(toInterpolatedValue);
-
-  return interpolated.reduce(...__reducers.sum);
-}
-
-function toInterpolatedValue(input: number[]) {
-  const seqs = allSeqs(input);
-
-  seqs[seqs.length - 1].push(0);
-  for (let i = seqs.length - 2; i >= 0; --i) {
-    seqs[i].push(seqs[i + 1][seqs[i].length - 1] + seqs[i][seqs[i].length - 1]);
-  }
-
-  return seqs[0][seqs[0].length - 1];
-}
-
-function allSeqs(input: number[]) {
-  const seqs = [input];
-
-  let lastSeq = input,
-    currSeq = [];
-  while (lastSeq.some((v) => v !== 0)) {
-    for (let i = 1; i < lastSeq.length; ++i) {
-      currSeq.push(lastSeq[i] - lastSeq[i - 1]);
-    }
-    seqs.push(currSeq);
-    lastSeq = currSeq;
-    currSeq = [];
-  }
-
-  return seqs;
+  const interpolatedNext = parsedInput
+    .map(toInterpolatedValues)
+    .map((v) => v.next);
+  return interpolatedNext.reduce(...__reducers.sum);
 }
 
 /* CHALLENGE 2 */
 export function solve2(input: string[]) {
   const parsedInput = parseInput(input);
-
-  const interpolated = parsedInput.map(toInterpolatedValue2);
-  return interpolated.reduce(...__reducers.sum);
-}
-
-function toInterpolatedValue2(input: number[]) {
-  const seqs = allSeqs(input).map((s) => s.reverse());
-  console.log(seqs);
-
-  seqs[seqs.length - 1].push(0);
-  for (let i = seqs.length - 2; i >= 0; --i) {
-    seqs[i].push(
-      -seqs[i + 1][seqs[i].length - 1] + seqs[i][seqs[i].length - 1],
-    );
-  }
-
-  return seqs[0][seqs[0].length - 1];
+  const interpolatedPrev = parsedInput
+    .map(toInterpolatedValues)
+    .map((v) => v.prev);
+  return interpolatedPrev.reduce(...__reducers.sum);
 }
 
 /* SHARED */
 // Parse the input into a usable format. An example of input is provided below in the __forceInput.input variable.
 function parseInput(input: string[]) {
   return input.map((i) => __input.listOfNums(i));
+}
+
+function toInterpolatedValues(input: number[]) {
+  const diffSeqs = allDiffSequences(input);
+
+  diffSeqs[diffSeqs.length - 1].push(0);
+  for (let i = diffSeqs.length - 2; i >= 0; --i) {
+    diffSeqs[i].push(
+      diffSeqs[i + 1][diffSeqs[i].length - 1] +
+        diffSeqs[i][diffSeqs[i].length - 1],
+    );
+  }
+
+  const revDiffSeqs = diffSeqs.map((s) => s.reverse());
+  revDiffSeqs[revDiffSeqs.length - 1].push(0);
+  for (let i = revDiffSeqs.length - 2; i >= 0; --i) {
+    revDiffSeqs[i].push(
+      -revDiffSeqs[i + 1][revDiffSeqs[i].length - 1] +
+        revDiffSeqs[i][revDiffSeqs[i].length - 1],
+    );
+  }
+
+  const interpolatedDiffSeqs = revDiffSeqs.map((s) => s.reverse());
+
+  return {
+    prev: interpolatedDiffSeqs[0][0],
+    next: interpolatedDiffSeqs[0][interpolatedDiffSeqs[0].length - 1],
+  };
+}
+
+function allDiffSequences(input: number[]) {
+  const seqs = [input];
+
+  // Until the last sequence is all 0s
+  let lastSeq = input;
+  while (lastSeq.some((v) => v !== 0)) {
+    lastSeq = diffSequence(lastSeq);
+    seqs.push(lastSeq);
+  }
+
+  return seqs;
+}
+
+function diffSequence(input: number[]) {
+  const seq = [];
+  for (let i = 1; i < input.length; ++i) {
+    seq.push(input[i] - input[i - 1]);
+  }
+  return seq;
 }
 
 export const __forceInput = {
