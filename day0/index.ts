@@ -1,6 +1,7 @@
 import * as __input from "../utils/input";
 import * as __reducers from "../utils/reducers";
 import * as __sorters from "../utils/sorters";
+import * as __math from "../utils/math";
 
 /* CHALLENGE 1 */
 export function solve1(input: string[]) {
