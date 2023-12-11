@@ -2,6 +2,7 @@ import * as __input from "../utils/input";
 import * as __reducers from "../utils/reducers";
 import * as __sorters from "../utils/sorters";
 import * as __math from "../utils/math";
+import * as __grids from "../utils/grids";
 import * as __arrays from "../utils/arrays";
 
 /* CHALLENGE 1 */
@@ -29,22 +30,21 @@ function solve(grid: string[][], multiplier: number) {
     .map((row, i) => (isEmpty(row) ? i : undefined))
     .filter((x) => x !== undefined);
 
-  const cols = __arrays.toCols(grid);
+  const cols = __grids.toCols(grid);
   const emptyCols = cols
     .map((col, i) => (isEmpty(col) ? i : undefined))
     .filter((x) => x !== undefined);
 
-  const galaxies = __arrays.findAllInGrid(grid, (x) => x === "#");
+  const galaxies = __grids.findAllInGrid(grid, (x) => x === "#");
 
   const distancesBetweenGalaxies = __arrays
-    .pairs(galaxies)
-    .map(([[x1, y1], [x2, y2]]) => {
-      const offsetX = emptyRows.filter(__math.isBetween(x1, x2)).length;
-      const offsetY = emptyCols.filter(__math.isBetween(y1, y2)).length;
+    .makePairs(galaxies)
+    .map(([c1, c2]) => {
+      const offsetX = emptyCols.filter(__math.isBetween(c1.x, c2.x)).length;
+      const offsetY = emptyRows.filter(__math.isBetween(c1.y, c2.y)).length;
       return (
-        Math.abs(x1 - x2) +
+        __grids.manhattanDistance(c1, c2) +
         offsetX * (multiplier - 1) +
-        Math.abs(y1 - y2) +
         offsetY * (multiplier - 1)
       );
     });

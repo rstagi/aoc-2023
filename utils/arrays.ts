@@ -1,8 +1,25 @@
-export function insertAt<T>(src: T[], index: number, element: T) {
-  return src.splice(index, 0, element);
+export function insertAt<T>(arr: T[], index: number, value: T) {
+  arr.splice(index, 0, value);
 }
 
-export function pairs<T>(src: T[]) {
+export function insertManyAt<T>(arr: T[], index: number, values: T[]) {
+  arr.splice(index, 0, ...values);
+}
+
+export function insertSorted<T>(
+  arr: T[],
+  value: T,
+  compare: (a: T, b: T) => number,
+) {
+  const index = arr.findIndex((x) => compare(x, value) > 0);
+  if (index === -1) {
+    arr.push(value);
+  } else {
+    insertAt(arr, index, value);
+  }
+}
+
+export function makePairs<T>(src: T[]): [T, T][] {
   const pairs = [];
   for (let i = 0; i < src.length; i++) {
     for (let j = i + 1; j < src.length; j++) {
@@ -10,46 +27,4 @@ export function pairs<T>(src: T[]) {
     }
   }
   return pairs;
-}
-
-export function scanGrid<T>(
-  grid: T[][],
-  fn: (x: T, i: number, j: number) => void,
-) {
-  for (let i = 0; i < grid.length; ++i) {
-    for (let j = 0; j < grid[i].length; ++j) {
-      fn(grid[i][j], i, j);
-    }
-  }
-}
-
-export function findAllInGrid<T>(
-  grid: T[][],
-  fn: (x: T, i: number, j: number) => boolean,
-) {
-  const found = [];
-  scanGrid(grid, (x, i, j) => {
-    if (fn(x, i, j)) {
-      found.push([i, j]);
-    }
-  });
-  return found;
-}
-
-export function toCols<T>(grid: T[][]) {
-  return grid[0].map((_, i) => grid.map((row) => row[i]));
-}
-
-export function forEachRow<T>(
-  grid: T[][],
-  fn: (row: T[], index: number) => void,
-) {
-  return grid.forEach(fn);
-}
-
-export function forEachCol<T>(
-  grid: T[][],
-  fn: (col: T[], index: number) => void,
-) {
-  return toCols(grid).forEach(fn);
 }
