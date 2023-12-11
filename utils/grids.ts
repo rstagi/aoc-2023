@@ -3,8 +3,35 @@ export type Coordinate = {
   y: number;
 };
 
-export function gridAt<T>(grid: T[][], coord: Coordinate) {
+export function get<T>(
+  grid: T[][],
+  coord: Coordinate,
+  defaultValue: T | undefined = undefined,
+) {
+  if (
+    coord.x < 0 ||
+    coord.y < 0 ||
+    coord.y >= grid.length ||
+    coord.x >= grid[coord.y].length
+  ) {
+    return defaultValue;
+  }
+
   return grid[coord.y][coord.x];
+}
+
+export function set<T>(grid: T[][], coord: Coordinate, value: T) {
+  if (
+    coord.x < 0 ||
+    coord.y < 0 ||
+    coord.y >= grid.length ||
+    coord.x >= grid[coord.y].length
+  ) {
+    return false;
+  }
+
+  grid[coord.y][coord.x] = value;
+  return true;
 }
 
 export function scanGrid<T>(

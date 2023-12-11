@@ -2,236 +2,36 @@ import * as __input from "../utils/input";
 import * as __reducers from "../utils/reducers";
 import * as __sorters from "../utils/sorters";
 import * as __math from "../utils/math";
+import * as __arrays from "../utils/arrays";
+import * as __grids from "../utils/grids";
+
+const CONNECTING_TO_UP = ["|", "L", "J", "S"];
+const CONNECTING_TO_DOWN = ["|", "F", "7", "S"];
+const CONNECTING_TO_LEFT = ["-", "J", "7", "S"];
+const CONNECTING_TO_RIGHT = ["-", "L", "F", "S"];
 
 /* CHALLENGE 1 */
 export function solve1(input: string[]) {
-  const { loops, loopAt } = solve(input);
-  let max = 0;
-  for (let i = 0; i < loops.length; ++i) {
-    for (let j = 0; j < loops[i].length; ++j) {
-      if (loops[i][j] === Infinity || !loopAt[i][j]) {
-        continue;
-      }
-      max = Math.max(max, loops[i][j]);
-    }
-  }
-
-  return max;
-}
-export function solve(input: string[]) {
-  const grid = parseInput(input);
-
-  const loops = grid.map((r) => r.map(() => Infinity));
-  const queue = [];
-
-  const shouldSkip = (i: number, j: number) => {
-    return (
-      i < 0 ||
-      j < 0 ||
-      i >= grid.length ||
-      j >= grid[i].length ||
-      grid[i][j] === "."
-    );
-  };
-
-  const isVisitable = (
-    i: number,
-    j: number,
-    from: readonly [number, number],
-  ) => {
-    const [fromI, fromJ] = from;
-    return (
-      !shouldSkip(i, j) &&
-      !queue.some(([x, y]) => `${x}-${y}` === `${i}-${j}`) &&
-      loops[i][j] > loops[fromI][fromJ] + 1
-    );
-  };
-
-  let startPos: [number, number];
-  for (let i = 0; i < grid.length; ++i) {
-    for (let j = 0; j < grid[i].length; ++j) {
-      if (grid[i][j] === "S") {
-        startPos = [i, j];
-        loops[i][j] = 0;
-        queue.push(
-          ...[
-            !shouldSkip(i, j - 1) ? [i, j - 1] : [],
-            !shouldSkip(i, j + 1) ? [i, j + 1] : [],
-            !shouldSkip(i - 1, j) ? [i - 1, j] : [],
-            !shouldSkip(i + 1, j) ? [i + 1, j] : [],
-            !shouldSkip(i - 1, j - 1) ? [i - 1, j - 1] : [],
-            !shouldSkip(i - 1, j + 1) ? [i - 1, j + 1] : [],
-            !shouldSkip(i + 1, j - 1) ? [i + 1, j - 1] : [],
-            !shouldSkip(i + 1, j + 1) ? [i + 1, j + 1] : [],
-          ].filter((x) => x.length > 0),
-        );
-        break;
-      }
-    }
-  }
-
-  const valOrInf = (i: number, j: number) =>
-    i < 0 || j < 0 || i >= loops.length || j >= loops[i].length
-      ? Infinity
-      : loops[i][j];
-
-  const areReachable = (...coords: [number, number][]) => {
-    return coords.every(([i, j]) => valOrInf(i, j) !== Infinity);
-  };
-
-  const coordsToVisitFrom = (
-    currCoord: [number, number],
-  ): [number, number][] => {
-    const [i, j] = currCoord;
-    if (shouldSkip(i, j)) {
-      return [];
-    }
-
-    if (grid[i][j] === "-") {
-      return [
-        [i, j - 1],
-        [i, j + 1],
-      ];
-    } else if (grid[i][j] === "|") {
-      return [
-        [i - 1, j],
-        [i + 1, j],
-      ];
-    } else if (grid[i][j] === "L") {
-      return [
-        [i - 1, j],
-        [i, j + 1],
-      ];
-    } else if (grid[i][j] === "J") {
-      return [
-        [i, j - 1],
-        [i - 1, j],
-      ];
-    } else if (grid[i][j] === "7") {
-      return [
-        [i + 1, j],
-        [i, j - 1],
-      ];
-    } else if (grid[i][j] === "F") {
-      return [
-        [i + 1, j],
-        [i, j + 1],
-      ];
-    }
-
-    return [];
-  };
-
-  const validSurroundingPipes = {
-    "-": (i: number, j: number) => {
-      return [
-        ["-", "L", "F", "S"].includes(grid[i][j - 1]) ? [i, j - 1] : [],
-        ["-", "J", "7", "S"].includes(grid[i][j + 1]) ? [i, j + 1] : [],
-      ].filter((x) => x.length > 0);
-    },
-    "|": (i: number, j: number) => {
-      return [
-        ["|", "F", "7", "S"].includes(grid[i - 1]?.[j]) ? [i - 1, j] : [],
-        ["|", "L", "J", "S"].includes(grid[i + 1]?.[j]) ? [i + 1, j] : [],
-      ].filter((x) => x.length > 0);
-    },
-    L: (i: number, j: number) => {
-      return [
-        ["-", "7", "J", "S"].includes(grid[i][j + 1]) ? [i, j + 1] : [],
-        ["|", "F", "7", "S"].includes(grid[i - 1]?.[j]) ? [i - 1, j] : [],
-      ].filter((x) => x.length > 0);
-    },
-    J: (i: number, j: number) => {
-      return [
-        ["-", "L", "F", "S"].includes(grid[i][j - 1]) ? [i, j - 1] : [],
-        ["|", "7", "F", "S"].includes(grid[i - 1]?.[j]) ? [i - 1, j] : [],
-      ].filter((x) => x.length > 0);
-    },
-    "7": (i: number, j: number) => {
-      return [
-        ["-", "L", "F", "S"].includes(grid[i][j - 1]) ? [i, j - 1] : [],
-        ["|", "L", "J", "S"].includes(grid[i + 1]?.[j]) ? [i + 1, j] : [],
-      ].filter((x) => x.length > 0);
-    },
-    F: (i: number, j: number) => {
-      return [
-        ["-", "7", "J", "S"].includes(grid[i][j + 1]) ? [i, j + 1] : [],
-        ["|", "L", "J", "S"].includes(grid[i + 1]?.[j]) ? [i + 1, j] : [],
-      ].filter((x) => x.length > 0);
-    },
-  };
-  while (queue.length > 0) {
-    const curr = queue.shift();
-    const [i, j] = curr!;
-    if (shouldSkip(i, j)) {
-      continue;
-    }
-
-    loops[i][j] =
-      validSurroundingPipes[grid[i][j]](i, j)
-        .map(([x, y]) => valOrInf(x, y))
-        .reduce(...__reducers.min) + 1;
-
-    queue.push(
-      ...[
-        isVisitable(i, j - 1, curr) ? [i, j - 1] : [],
-        isVisitable(i, j + 1, curr) ? [i, j + 1] : [],
-        isVisitable(i - 1, j, curr) ? [i - 1, j] : [],
-        isVisitable(i + 1, j, curr) ? [i + 1, j] : [],
-        isVisitable(i - 1, j - 1, curr) ? [i - 1, j - 1] : [],
-        isVisitable(i - 1, j + 1, curr) ? [i - 1, j + 1] : [],
-        isVisitable(i + 1, j - 1, curr) ? [i + 1, j - 1] : [],
-        isVisitable(i + 1, j + 1, curr) ? [i + 1, j + 1] : [],
-      ].filter((x) => x.length > 0),
-    );
-  }
-
-  const loopAt = grid.map((r) => r.map(() => false));
-  const isPartOfLoop = (i: number, j: number) => {
-    return (
-      !shouldSkip(i, j) && areReachable([i, j], ...coordsToVisitFrom([i, j]))
-    );
-  };
-  for (let i = 0; i < loops.length; ++i) {
-    for (let j = 0; j < loops[i].length; ++j) {
-      if (isPartOfLoop(i, j)) {
-        loopAt[i][j] = true;
-      }
-    }
-  }
-
-  // replace the S with the right pipe
-  const [x, y] = startPos;
-  if (loopAt[x - 1]?.[y] && loopAt[x + 1]?.[y]) {
-    grid[x][y] = "|";
-  } else if (loopAt[x]?.[y - 1] && loopAt[x]?.[y + 1]) {
-    grid[x][y] = "-";
-  } else if (loopAt[x - 1]?.[y] && loopAt[x]?.[y + 1]) {
-    grid[x][y] = "L";
-  } else if (loopAt[x - 1]?.[y] && loopAt[x]?.[y - 1]) {
-    grid[x][y] = "J";
-  } else if (loopAt[x + 1]?.[y] && loopAt[x]?.[y - 1]) {
-    grid[x][y] = "7";
-  } else if (loopAt[x + 1]?.[y] && loopAt[x]?.[y + 1]) {
-    grid[x][y] = "F";
-  }
-
-  return { grid, loops, loopAt };
+  const { loops } = getGridAndLoopInfo(input);
+  return loops
+    .flatMap((r) => r)
+    .filter((r) => r !== Infinity)
+    .reduce(...__reducers.max);
 }
 
 /* CHALLENGE 2 */
 export function solve2(input: string[]) {
-  const { grid, loopAt } = solve(input);
+  const { grid } = getGridAndLoopInfo(input);
   let countInside = 0,
     isInsideLR = false,
     isInsideUD = grid[0].map(() => false),
     lastSymbolLR = "|",
     lastSymbolUD = "-".repeat(grid[0].length).split("");
-  for (let i = 0; i < loopAt.length; ++i) {
+  for (let i = 0; i < grid.length; ++i) {
     lastSymbolLR = "|";
     isInsideLR = false;
-    for (let j = 0; j < loopAt[i].length; ++j) {
-      if (loopAt[i][j]) {
+    for (let j = 0; j < grid[i].length; ++j) {
+      if (grid[i][j] !== ".") {
         if (grid[i][j] === "|") {
           isInsideLR = !isInsideLR;
           lastSymbolLR = "|";
@@ -261,13 +61,11 @@ export function solve2(input: string[]) {
             isInsideUD[j] = !isInsideUD[j];
             lastSymbolUD[j] = grid[i][j];
           }
-          // lastSymbolLR = lastSymbolUD[j] = grid[i][j];
         }
         continue;
       }
 
       if (isInsideLR && isInsideUD[j]) {
-        // console.log(i, j, grid[i][j]);
         countInside += 1;
       }
     }
@@ -279,7 +77,143 @@ export function solve2(input: string[]) {
 /* SHARED */
 // Parse the input into a usable format. An example of input is provided below in the __forceInput.input variable.
 function parseInput(input: string[]) {
-  return input.map((r) => r.split(""));
+  return __input.toGrid(input);
+}
+
+export function getGridAndLoopInfo(input: string[]) {
+  const grid = parseInput(input);
+
+  const loops = grid.map((r) => r.map(() => Infinity));
+  const queue: __grids.Coordinate[] = [];
+
+  const [startPos] = __grids.findAllInGrid(grid, (x) => x === "S");
+  __grids.set(loops, startPos, 0);
+  queue.push(...allReacheableFrom(startPos));
+
+  while (queue.length > 0) {
+    const curr = queue.shift();
+
+    const reacheableFromCurr = allReacheableFrom(curr);
+    const loopDist =
+      reacheableFromCurr
+        .map((c) => __grids.get(loops, c, Infinity))
+        .reduce(...__reducers.min) + 1;
+    __grids.set(loops, curr, loopDist);
+
+    const toVisit = reacheableFromCurr.filter(
+      (c) => __grids.get(loops, c, Infinity) > loopDist,
+    );
+
+    queue.push(...toVisit.filter((c) => !isInQueue(c)));
+  }
+
+  const loopAt = grid.map((r) => r.map(() => false));
+  __grids.scanGrid(loops, (_, coord) => {
+    const isInLoop =
+      __grids.get(loops, coord, Infinity) !== Infinity ||
+      areReachable(coord, ...allReacheableFrom(coord));
+    __grids.set(loopAt, coord, isInLoop);
+  });
+
+  // mask the grid with the loopAt grid
+  __grids.scanGrid(grid, (_, coord) => {
+    if (!__grids.get(loopAt, coord, false)) {
+      __grids.set(grid, coord, ".");
+      __grids.set(loops, coord, Infinity);
+    }
+  });
+
+  // replace the S with the right pipe
+  const replacedStart = [
+    {
+      ifCanGo: ["up", "down"],
+      then: "|",
+    },
+    {
+      ifCanGo: ["left", "right"],
+      then: "-",
+    },
+    {
+      ifCanGo: ["up", "left"],
+      then: "J",
+    },
+    {
+      ifCanGo: ["up", "right"],
+      then: "L",
+    },
+    {
+      ifCanGo: ["down", "left"],
+      then: "7",
+    },
+    {
+      ifCanGo: ["down", "right"],
+      then: "F",
+    },
+  ].find(({ ifCanGo }) =>
+    ifCanGo.every((dir) => canGo(startPos, dir as keyof typeof __grids.move)),
+  )!.then;
+
+  __grids.set(grid, startPos, replacedStart);
+
+  return { grid, loops };
+
+  function isInQueue(c: __grids.Coordinate) {
+    return queue.some((_c) => `${c.x}-${c.y}` === `${_c.x}-${_c.y}`);
+  }
+
+  function areReachable(...coords: __grids.Coordinate[]) {
+    return coords.every(
+      ({ y, x }) => __grids.get(loops, { y, x }, Infinity) !== Infinity,
+    );
+  }
+
+  function canGo(
+    currCoord: __grids.Coordinate,
+    dir: keyof typeof __grids.move,
+  ) {
+    const curr = __grids.get(grid, currCoord);
+    switch (dir) {
+      case "up":
+        const up = __grids.get(grid, __grids.move.up(currCoord));
+        return (
+          CONNECTING_TO_UP.includes(curr) && CONNECTING_TO_DOWN.includes(up)
+        );
+      case "down":
+        const down = __grids.get(grid, __grids.move.down(currCoord));
+        return (
+          CONNECTING_TO_DOWN.includes(curr) && CONNECTING_TO_UP.includes(down)
+        );
+      case "left":
+        const left = __grids.get(grid, __grids.move.left(currCoord));
+        return (
+          CONNECTING_TO_LEFT.includes(curr) &&
+          CONNECTING_TO_RIGHT.includes(left)
+        );
+      case "right":
+        const right = __grids.get(grid, __grids.move.right(currCoord));
+        return (
+          CONNECTING_TO_RIGHT.includes(curr) &&
+          CONNECTING_TO_LEFT.includes(right)
+        );
+    }
+  }
+
+  function allReacheableFrom(pos: __grids.Coordinate) {
+    const reacheable: __grids.Coordinate[] = [];
+    if (canGo(pos, "up")) {
+      reacheable.push(__grids.move.up(pos));
+    }
+    if (canGo(pos, "down")) {
+      reacheable.push(__grids.move.down(pos));
+    }
+    if (canGo(pos, "left")) {
+      reacheable.push(__grids.move.left(pos));
+    }
+    if (canGo(pos, "right")) {
+      reacheable.push(__grids.move.right(pos));
+    }
+    return reacheable;
+  }
 }
 
 export const __forceInput = {
