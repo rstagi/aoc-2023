@@ -12,3 +12,7 @@ export function gcd(x: number, y: number) {
   }
   return x;
 }
+
+export function isBetween(a: number, b: number) {
+  return (x: number) => x >= Math.min(a, b) && x <= Math.max(a, b);
+}
