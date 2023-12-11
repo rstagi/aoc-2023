@@ -3,13 +3,17 @@ export type Coordinate = {
   y: number;
 };
 
+export function gridAt<T>(grid: T[][], coord: Coordinate) {
+  return grid[coord.y][coord.x];
+}
+
 export function scanGrid<T>(
   grid: T[][],
   fn: (x: T, coord: Coordinate) => void,
 ) {
-  for (let i = 0; i < grid.length; ++i) {
-    for (let j = 0; j < grid[i].length; ++j) {
-      fn(grid[i][j], { x: j, y: i });
+  for (let y = 0; y < grid.length; ++y) {
+    for (let x = 0; x < grid[y].length; ++x) {
+      fn(grid[y][x], { x, y });
     }
   }
 }
@@ -28,7 +32,7 @@ export function findAllInGrid<T>(
 }
 
 export function toCols<T>(grid: T[][]) {
-  return grid[0].map((_, i) => grid.map((row) => row[i]));
+  return grid[0].map((_, x) => grid.map((row) => row[x]));
 }
 
 export function forEachRow<T>(
@@ -48,3 +52,36 @@ export function forEachCol<T>(
 export function manhattanDistance(c1: Coordinate, c2: Coordinate) {
   return Math.abs(c1.x - c2.x) + Math.abs(c1.y - c2.y);
 }
+
+export function pairToCoord([x, y]: [number, number]): Coordinate {
+  return { x, y };
+}
+
+export function surroundingCoords(
+  c: Coordinate,
+  {
+    maxLen = Infinity,
+    includeCorners = false,
+  }: { maxLen?: number; includeCorners?: boolean } = {},
+) {
+  return [
+    move.up(c),
+    move.down(c),
+    move.left(c),
+    move.right(c),
+    ...(includeCorners
+      ? [move.upLeft(c), move.upRight(c), move.downLeft(c), move.downRight(c)]
+      : []),
+  ].filter((c) => c.x >= 0 && c.y >= 0 && c.x < maxLen && c.y < maxLen);
+}
+
+export const move = {
+  up: (c: Coordinate) => ({ x: c.x, y: c.y - 1 }),
+  down: (c: Coordinate) => ({ x: c.x, y: c.y + 1 }),
+  left: (c: Coordinate) => ({ x: c.x - 1, y: c.y }),
+  right: (c: Coordinate) => ({ x: c.x + 1, y: c.y }),
+  upLeft: (c: Coordinate) => ({ x: c.x - 1, y: c.y - 1 }),
+  upRight: (c: Coordinate) => ({ x: c.x + 1, y: c.y - 1 }),
+  downLeft: (c: Coordinate) => ({ x: c.x - 1, y: c.y + 1 }),
+  downRight: (c: Coordinate) => ({ x: c.x + 1, y: c.y + 1 }),
+};

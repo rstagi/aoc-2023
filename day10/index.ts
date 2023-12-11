@@ -79,7 +79,7 @@ export function solve(input: string[]) {
     return coords.every(([i, j]) => valOrInf(i, j) !== Infinity);
   };
 
-  const returnCoordsToVisit = (
+  const coordsToVisitFrom = (
     currCoord: [number, number],
   ): [number, number][] => {
     const [i, j] = currCoord;
@@ -189,7 +189,7 @@ export function solve(input: string[]) {
   const loopAt = grid.map((r) => r.map(() => false));
   const isPartOfLoop = (i: number, j: number) => {
     return (
-      !shouldSkip(i, j) && areReachable([i, j], ...returnCoordsToVisit([i, j]))
+      !shouldSkip(i, j) && areReachable([i, j], ...coordsToVisitFrom([i, j]))
     );
   };
   for (let i = 0; i < loops.length; ++i) {
