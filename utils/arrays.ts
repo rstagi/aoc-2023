@@ -28,3 +28,20 @@ export function makePairs<T>(src: T[]): [T, T][] {
   }
   return pairs;
 }
+
+export function distinct<T>(resources: T[]): T[] {
+  return [...new Set(resources)];
+}
+
+export function distinctProp<T, K extends keyof T>(
+  resources: T[],
+  key: K,
+): Exclude<T[K], null | undefined>[] {
+  return [
+    ...new Set(
+      resources
+        .filter((item) => Boolean(item[key]))
+        .map((item) => item[key] as Exclude<T[K], null | undefined>),
+    ),
+  ];
+}
