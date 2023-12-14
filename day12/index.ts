@@ -4,31 +4,54 @@ import * as __sorters from "../utils/sorters";
 import * as __math from "../utils/math";
 import * as __arrays from "../utils/arrays";
 
-/* CHALLENGE 1 */
-const DEBUG = 5;
+// /* CHALLENGE 1 */
 export function solve1(input: string[]) {
   const springsInfo = parseInput(input);
-  const ways = springsInfo.map(countWays);
+  const ways = springsInfo.map((si) =>
+    countWaysRec(
+      si.row,
+      si.damagedGroups,
+      0,
+      si.damagedGroups.reduce(...__reducers.sum),
+    ),
+  );
+
   return ways.reduce(...__reducers.sum);
 }
 
-/* CHALLENGE 2 */
-// export function solve2(input: string[]) {
-//   const springsInfo = parseInput(input);
-//   const unfoldedSpringsInfo = springsInfo.map(({ row, damagedGroups }) => ({
-//     row: `${row}?`.repeat(5).slice(0, -1),
-//     damagedGroups: `${damagedGroups.join(",")},`
-//       .repeat(5)
-//       .slice(0, -1)
-//       .split(",")
-//       .map((group) => parseInt(group, 10))
-//       .filter((group) => !isNaN(group)),
-//   }));
+// const args: [string, number[]] = [".?.#??#?.?", [1, 3]];
 //
-//   const ways = unfoldedSpringsInfo.map(countWays);
-//   return ways.reduce(...__reducers.sum);
-// }
+// console.log("ROW:", args[0], "GROUPS:", args[1], "\n");
+// console.log(
+//   countWaysRec(args[0], args[1], 0, args[1].reduce(...__reducers.sum)),
+// );
+// console.log(countWays({ row: args[0], damagedGroups: args[1] }));
 
+/* CHALLENGE 2 */
+export function solve2(input: string[]) {
+  const springsInfo = parseInput(input);
+  const unfoldedSpringsInfo = springsInfo.map(({ row, damagedGroups }) => ({
+    row: `${row}?`.repeat(5).slice(0, -1),
+    damagedGroups: `${damagedGroups.join(",")},`
+      .repeat(5)
+      .slice(0, -1)
+      .split(",")
+      .map((group) => parseInt(group, 10))
+      .filter((group) => !isNaN(group)),
+  }));
+
+  const ways = unfoldedSpringsInfo.map((si, i) => {
+    console.log(i);
+    return countWaysRec(
+      si.row,
+      si.damagedGroups,
+      0,
+      si.damagedGroups.reduce(...__reducers.sum),
+    );
+  });
+  return ways.reduce(...__reducers.sum);
+}
+//
 /* SHARED */
 // Parse the input into a usable format. An example of input is provided below in the __forceInput.input variable.
 function parseInput(input: string[]) {
@@ -44,176 +67,83 @@ function parseInput(input: string[]) {
     }));
 }
 
-function countWaysR(
-  startPos: number,
-  group: number,
+function countWaysRec(
   row: string,
-  damagedGroups: number[],
-  countPointsInRange: number[][],
-  canGroupStartAt: boolean[][],
-): number {
-  // console.log(startPos, group);
-  if (group >= damagedGroups.length) {
-    // console.log("returning 1\n");
-    return 1;
+  groups: number[],
+  currPos: number,
+  totDamagedSprings: number,
+) {
+  if (groups.length === 0) {
+    let currDamagedSprings = 0;
+    for (let i = 0; i < row.length; ++i) {
+      if (row[i] === "#") {
+        currDamagedSprings += 1;
+      }
+    }
+    // console.log(row, currDamagedSprings, totDamagedSprings);
+    return currDamagedSprings === totDamagedSprings ? 1 : 0;
   }
 
-  if (startPos >= row.length) {
-    // console.log("returning 0");
+  const neededCells = groups.reduce(...__reducers.sum) + groups.length - 1;
+  if (currPos + neededCells > row.length) {
     return 0;
   }
 
-  let groupStart = startPos;
-
-  let ways = 0;
-  for (; groupStart <= row.length - damagedGroups[group]; groupStart++) {
-    while (
-      groupStart <= row.length - damagedGroups[group] &&
-      (!canGroupStartAt[group][groupStart] ||
-        countPointsInRange[groupStart][damagedGroups[group]] > 0 ||
-        (groupStart + damagedGroups[group] < row.length &&
-          row[groupStart + damagedGroups[group]] === "#"))
-    ) {
-      canGroupStartAt[group][groupStart] = false;
-      groupStart++;
-    }
-    //
-    // console.log(
-    //   startPos,
-    //   group,
-    //   groupStart,
-    //   groupStart + damagedGroups[group] + 1,
-    //   group + 1,
-    // );
-
-    if (groupStart > row.length - damagedGroups[group]) {
-      break;
-    }
-
-    const count = countWaysR(
-      groupStart + damagedGroups[group] + 1,
-      group + 1,
-      row,
-      damagedGroups,
-      countPointsInRange,
-      canGroupStartAt,
-    );
-
-    if (count === 0) {
-      canGroupStartAt[group][groupStart] = false;
-      continue;
-    }
-
-    ways += count;
-  }
-
-  return ways;
-}
-
-function countWays({
-  row,
-  damagedGroups,
-}: {
-  row: string;
-  damagedGroups: number[];
-}) {
-  const unknowns: number[] = [];
-  for (let i = 0; i < row.length; ++i) {
-    if (row[i] === "?") {
-      unknowns.push(i);
-    }
-  }
-
-  const canGroupStartAt: boolean[][] = damagedGroups.map(() =>
-    row.split("").map(() => true),
-  );
-
-  const maxGroup = Math.max(...damagedGroups);
-  const countPointsInRange: number[][] = row.split("").map(() => []);
-  for (let i = 0; i < row.length; ++i) {
-    let count = 0;
-    for (let j = 0; j < maxGroup; ++j) {
-      if (row[i + j] === ".") {
-        count += 1;
-      }
-      countPointsInRange[i].push(count);
-    }
-  }
-
-  const ways = countWaysR(
-    0,
-    0,
+  const [currGroup, ...restGroups] = groups;
+  const starts = findUsableStarts(
     row,
-    damagedGroups,
-    countPointsInRange,
-    canGroupStartAt,
+    currPos,
+    currGroup,
+    row.length - neededCells,
   );
-  console.log(row, damagedGroups, ways);
-  // console.log("");
-  // let ways = 0;
-  // for (let startPos = 0; startPos < row.length; startPos++) {
-  //   let groupStart = startPos,
-  //     isValid = true;
-  //   for (let group = 0; group < damagedGroups.length; group++) {
-  //     if (row.slice(groupStart, damagedGroups[group]).includes(".")) {
-  //       canGroupStartAt[group][groupStart] = false;
-  //       isValid = false;
-  //       break;
-  //     }
-  //     groupStart += damagedGroups[group] + 1;
-  //   }
-  //   if (isValid) ways++;
-  // }
 
-  return ways;
-
-  // const totalDamaged = damagedGroups.reduce(...__reducers.sum);
-  // const alreadyDamaged = row.split("").filter((s) => s === "#").length;
-  // const damageable = totalDamaged - alreadyDamaged;
-
-  // console.log(
-  //   row,
-  //   damagedGroups,
-  //   unknowns,
-  //   totalDamaged,
-  //   alreadyDamaged,
-  //   damageable,
-  // );
-
-  // let ways = 0;
-  // const visited: Record<string, boolean> = {};
-  // for (let i = 0; i < Math.pow(2, unknowns.length); ++i) {
-  //   let damaged = 0;
-  //   const currRow = row.split("");
-  //   for (let j = 0; j < unknowns.length; ++j) {
-  //     const curr = i & (1 << j) && damaged < damageable ? "#" : ".";
-  //     if (curr === "#") {
-  //       damaged += 1;
-  //     }
-  //     currRow[unknowns[j]] = curr;
-  //   }
-  //   const damagedRow = currRow.join("");
-  //   if (!visited[damagedRow] && isCorrect(damagedRow, damagedGroups)) {
-  //     ways += 1;
-  //   }
-  //   visited[damagedRow] = true;
-  // }
-  // // console.log(row, damagedGroups, ways);
-  //
-  // return ways;
-}
-
-function isCorrect(row: string, damagedGroups: number[]) {
-  const currGroups = row.split(".").filter((group) => group.length > 0);
-  if (currGroups.length !== damagedGroups.length) {
-    return false;
+  // console.log(currPos, currGroup, starts, groups.length, neededCells);
+  let ways = 0;
+  for (const start of starts) {
+    const newRow =
+      row.substring(0, start).replace(new RegExp("\\?", "g"), ".") +
+      "#".repeat(currGroup) +
+      row.substring(start + currGroup);
+    ways += countWaysRec(
+      newRow,
+      restGroups,
+      start + currGroup + 1,
+      totDamagedSprings,
+    );
   }
 
-  return currGroups.every((group, i) => group.length === damagedGroups[i]);
+  return ways;
+}
+
+function findUsableStarts(
+  row: string,
+  currPos: number,
+  currGroup: number,
+  limit: number,
+) {
+  const starts = [];
+  while (currPos <= limit) {
+    const cells = row.substring(currPos, currPos + currGroup);
+    let foundAnchor = false;
+    if (
+      row[currPos - 1] !== "#" &&
+      !cells.includes(".") &&
+      row[currPos + currGroup] !== "#"
+    ) {
+      if (!foundAnchor && cells.includes("#")) {
+        foundAnchor = true;
+        limit = Math.min(currPos + cells.indexOf("#"), limit);
+      }
+      starts.push(currPos);
+    }
+    currPos++;
+  }
+
+  return starts;
 }
 
 export const __forceInput = {
-  force: true,
+  // force: true,
   input: `
 ???.### 1,1,3
 .??..??...?##. 1,1,3
