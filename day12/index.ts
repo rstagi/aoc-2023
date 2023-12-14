@@ -4,6 +4,9 @@ import * as __sorters from "../utils/sorters";
 import * as __math from "../utils/math";
 import * as __arrays from "../utils/arrays";
 
+const cache = new Map<string, number>();
+const usableStartsCache = new Map<string, number[]>();
+
 // /* CHALLENGE 1 */
 export function solve1(input: string[]) {
   const springsInfo = parseInput(input);
@@ -19,14 +22,6 @@ export function solve1(input: string[]) {
   return ways.reduce(...__reducers.sum);
 }
 
-// const args: [string, number[]] = [".?.#??#?.?", [1, 3]];
-//
-// console.log("ROW:", args[0], "GROUPS:", args[1], "\n");
-// console.log(
-//   countWaysRec(args[0], args[1], 0, args[1].reduce(...__reducers.sum)),
-// );
-// console.log(countWays({ row: args[0], damagedGroups: args[1] }));
-
 /* CHALLENGE 2 */
 export function solve2(input: string[]) {
   const springsInfo = parseInput(input);
@@ -40,18 +35,17 @@ export function solve2(input: string[]) {
       .filter((group) => !isNaN(group)),
   }));
 
-  const ways = unfoldedSpringsInfo.map((si, i) => {
-    console.log(i);
-    return countWaysRec(
+  const ways = unfoldedSpringsInfo.map((si) =>
+    countWaysRec(
       si.row,
       si.damagedGroups,
       0,
       si.damagedGroups.reduce(...__reducers.sum),
-    );
-  });
+    ),
+  );
   return ways.reduce(...__reducers.sum);
 }
-//
+
 /* SHARED */
 // Parse the input into a usable format. An example of input is provided below in the __forceInput.input variable.
 function parseInput(input: string[]) {
@@ -73,15 +67,19 @@ function countWaysRec(
   currPos: number,
   totDamagedSprings: number,
 ) {
+  const remainingDamages = totDamagedSprings - countDamagedSprings(row);
+  const cacheKey = `${row.substring(currPos)},${groups.join(
+    "-",
+  )},${remainingDamages}`;
+
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey);
+  }
+
   if (groups.length === 0) {
-    let currDamagedSprings = 0;
-    for (let i = 0; i < row.length; ++i) {
-      if (row[i] === "#") {
-        currDamagedSprings += 1;
-      }
-    }
-    // console.log(row, currDamagedSprings, totDamagedSprings);
-    return currDamagedSprings === totDamagedSprings ? 1 : 0;
+    const ways = remainingDamages === 0 ? 1 : 0;
+    cache.set(cacheKey, ways);
+    return ways;
   }
 
   const neededCells = groups.reduce(...__reducers.sum) + groups.length - 1;
@@ -97,7 +95,6 @@ function countWaysRec(
     row.length - neededCells,
   );
 
-  // console.log(currPos, currGroup, starts, groups.length, neededCells);
   let ways = 0;
   for (const start of starts) {
     const newRow =
@@ -112,7 +109,18 @@ function countWaysRec(
     );
   }
 
+  cache.set(cacheKey, ways);
   return ways;
+}
+
+function countDamagedSprings(row: string) {
+  let count = 0;
+  for (let i = 0; i < row.length; ++i) {
+    if (row[i] === "#") {
+      count += 1;
+    }
+  }
+  return count;
 }
 
 function findUsableStarts(
