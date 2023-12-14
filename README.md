@@ -1,5 +1,6 @@
 # Advent Of Code 2023
 
+## Start a day
 To run one of the solutions, run the following command:
 ```sh
 npm start dayN
@@ -16,16 +17,27 @@ solve1 result:  42
 solve2 result:  42
 ```
 
-By default, it will execute the `index.js` with the `input.txt` file inside the `dayN` folder.
+## Init a new day
 
-You can customize the input file by passing an additional argument:
-```sh
-npm start dayN ./dayN/some_other_input.txt
-```
-
-## Write new solutions
-
-To kick-off a new day, simply  run:
+Run:
 ```sh
 npm run newday
 ```
+
+This will init the next day considering the current directories (e.g. if the last `dayN` directory is `day12`, this command will init `day13`).
+
+To init a specific day, run:
+```sh
+npm run newday N 
+```
+Where N is between 1 and 25.
+
+## AoC session
+
+The `newday` script will search for a `.aocsession` file in the root of the project, which should contain the AoC session token ([see here how to retrieve the token](https://github.com/wimglenn/advent-of-code-wim/issues/1)).
+Be aware that you need to take ONLY the token, not the entire cookie. So the `.aocsession` file should contain something like the following:
+```
+53616c...795fa23
+```
+
+without the leading `session=`.
