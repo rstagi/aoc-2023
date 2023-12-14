@@ -17,9 +17,7 @@ export function solve2(input: string[]) {
   const grid = parseInput(input);
 
   let current = grid;
-  const cache = {
-      [current.map((r) => r.join("")).join("")]: 0,
-    },
+  const cache = {},
     seq = [grid];
   for (let i = 0; i < 1000000000; i++) {
     const afterNorth = __grids.toCols(current).map(rollRocks);
@@ -32,15 +30,16 @@ export function solve2(input: string[]) {
 
     current = afterEast;
 
-    const cyclePos = cache[afterEast.map((r) => r.join("")).join("")];
+    const key = current.map((r) => r.join("")).join("");
+
+    const cyclePos = cache[key];
     if (cyclePos !== undefined) {
       const finalPos = cyclePos - 1 + ((1000000000 - i) % (i - cyclePos + 1));
       current = seq[finalPos];
       break;
     }
 
-    cache[current.map((r) => r.join("")).join("")] = seq.length;
-    current = afterEast;
+    cache[key] = seq.length;
     seq.push(current);
   }
 
