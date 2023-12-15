@@ -17,29 +17,20 @@ export function solve2(input: string[]) {
 
   const boxes = new Map<number, [string, number][]>();
   for (const lensInfo of parsedInput) {
-    if (lensInfo.includes("=")) {
-      const [lens, focalLength] = lensInfo.split("=");
+    const cmd = parseLensInfo(lensInfo);
+    const { box, lensSlot, foundLens } = getLensInBox(cmd.lens);
 
-      const label = toHash(lens);
-      const box = boxes.get(label);
-      if (!box) {
-        boxes.set(label, [[lens, parseInt(focalLength)]]);
-        continue;
-      }
-
-      const existingLens = box.findIndex((x) => x[0] === lens);
-      if (existingLens > -1) {
-        box[existingLens][1] = parseInt(focalLength);
-      } else {
-        box.push([lens, parseInt(focalLength)]);
-      }
-    } else if (lensInfo.includes("-")) {
-      const [lens] = lensInfo.split("-");
-      const box = boxes.get(toHash(lens));
-      const existingLens = box?.findIndex((x) => x[0] === lens);
-      if (box && existingLens > -1) {
-        box.splice(existingLens, 1);
-      }
+    switch (cmd.type) {
+      case "delete":
+        if (foundLens) box.splice(lensSlot, 1);
+        break;
+      case "add":
+        if (foundLens) {
+          box[lensSlot][1] = cmd.focalLength;
+        } else {
+          box.push([cmd.lens, cmd.focalLength]);
+        }
+        break;
     }
   }
 
@@ -53,6 +44,42 @@ export function solve2(input: string[]) {
       return curr;
     })
     .reduce(...__reducers.sum);
+
+  function parseLensInfo(
+    lensInfo: string,
+  ):
+    | { type: "delete"; lens: string }
+    | { type: "add"; lens: string; focalLength: number } {
+    if (lensInfo.includes("=")) {
+      const [lens, focalLength] = lensInfo.split("=");
+      return { type: "add", lens, focalLength: parseInt(focalLength) };
+    } else if (lensInfo.includes("-")) {
+      const [lens] = lensInfo.split("-");
+      return { type: "delete", lens };
+    }
+  }
+
+  function getLensInBox(lens: string) {
+    const box = getBox(lens);
+    const lensSlot = box.findIndex(isLens(lens));
+    return {
+      box,
+      lensSlot,
+      foundLens: lensSlot > -1,
+    };
+  }
+
+  function getBox(lens: string): [string, number][] {
+    const label = toHash(lens);
+    if (!boxes.has(label)) {
+      boxes.set(label, []);
+    }
+    return boxes.get(label);
+  }
+
+  function isLens(lens: string) {
+    return (boxSlot: [string, number]) => boxSlot[0] === lens;
+  }
 }
 
 /* SHARED */
@@ -64,8 +91,7 @@ function parseInput(input: string[]) {
 function toHash(input: string) {
   let currentValue = 0;
   for (let i = 0; i < input.length; i++) {
-    const char = input[i];
-    currentValue += char.charCodeAt(0);
+    currentValue += input.charCodeAt(i);
     currentValue *= 17;
     currentValue %= 256;
   }
