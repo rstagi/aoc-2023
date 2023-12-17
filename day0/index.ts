@@ -3,6 +3,7 @@ import * as __reducers from "../utils/reducers";
 import * as __sorters from "../utils/sorters";
 import * as __math from "../utils/math";
 import * as __arrays from "../utils/arrays";
+import * as __grids from "../utils/grids";
 
 /* CHALLENGE 1 */
 export function solve1(input: string[]) {
