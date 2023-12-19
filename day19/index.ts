@@ -36,29 +36,106 @@ export function solve1(input: string[]) {
 
 /* CHALLENGE 2 */
 export function solve2(input: string[]) {
-  const parsedInput = parseInput(input);
-  // console.log(parsedInput);
-  const {} = parsedInput;
+  const { rules } = parseInput(input);
 
-  return 42;
+  const rangesToA: Record<Variable, { min: number; max: number }> = {
+    x: { min: 1, max: 4000 },
+    m: { min: 1, max: 4000 },
+    a: { min: 1, max: 4000 },
+    s: { min: 1, max: 4000 },
+  };
+
+  const ranges: Ranges[] = [];
+  findRanges("in", rangesToA, ranges, rules);
+
+  console.log(ranges);
+  let combinations = 0;
+  for (const range of ranges) {
+    combinations +=
+      (range.x.max - range.x.min + 1) *
+      (range.m.max - range.m.min + 1) *
+      (range.a.max - range.a.min + 1) *
+      (range.s.max - range.s.min + 1);
+  }
+
+  return combinations;
+}
+
+type Ranges = Record<Variable, { min: number; max: number }>;
+function findRanges(
+  currRule: string,
+  ranges: Ranges,
+  possibleRanges: Ranges[],
+  rules: Record<string, Rule>,
+) {
+  if (currRule === "A") {
+    possibleRanges.push(ranges);
+    return;
+  }
+
+  if (currRule === "R") {
+    return;
+  }
+
+  ranges = structuredClone(ranges);
+  for (const cond of rules[currRule].conditions) {
+    const { variable, condition, destination } = cond;
+    const newRanges = {
+      ...ranges,
+      [variable]: {
+        min: condition.includes(">")
+          ? Math.max(
+              ranges[variable].min,
+              parseInt(condition.split(">")[1]) + 1,
+            )
+          : ranges[variable].min,
+        max: condition.includes("<")
+          ? Math.min(
+              ranges[variable].max,
+              parseInt(condition.split("<")[1]) - 1,
+            )
+          : ranges[variable].max,
+      },
+    };
+    if (ranges[variable].min <= ranges[variable].max) {
+      findRanges(destination, newRanges, possibleRanges, rules);
+    }
+
+    ranges = {
+      ...structuredClone(ranges),
+      [variable]: {
+        min: condition.includes("<")
+          ? Math.max(ranges[variable].min, parseInt(condition.split("<")[1]))
+          : ranges[variable].min,
+        max: condition.includes(">")
+          ? Math.min(ranges[variable].max, parseInt(condition.split(">")[1]))
+          : ranges[variable].max,
+      },
+    };
+
+    if (ranges[variable].min > ranges[variable].max) {
+      return;
+    }
+  }
+
+  findRanges(rules[currRule].fallback, ranges, possibleRanges, rules);
 }
 
 /* SHARED */
 type Variable = "x" | "m" | "a" | "s";
+type Rule = {
+  name: string;
+  conditions: {
+    variable: Variable;
+    condition: string;
+    destination: string;
+  }[];
+  fallback: string;
+};
+
 // Parse the input into a usable format. An example of input is provided below in the __forceInput.input variable.
 function parseInput(input: string[]) {
-  const rules: Record<
-    string,
-    {
-      name: string;
-      conditions: {
-        variable: Variable;
-        condition: string;
-        destination: string;
-      }[];
-      fallback: string;
-    }
-  > = {};
+  const rules: Record<string, Rule> = {};
   for (let i = 0; i < input.length; i++) {
     if (input[i].trim() === "") {
       break;
