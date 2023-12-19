@@ -102,13 +102,27 @@ export function surroundingCoords(
   ].filter((c) => c.x >= 0 && c.y >= 0 && c.x < maxLen && c.y < maxLen);
 }
 
+export function createGrid(
+  rows: number,
+  cols: number,
+  defaultValue: () => any,
+) {
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, defaultValue),
+  );
+}
+
+export function print(grid: any[][]) {
+  console.log(grid.map((r) => r.join("")).join("\n"));
+}
+
 export const move = {
-  up: (c: Coordinate) => ({ x: c.x, y: c.y - 1 }),
-  down: (c: Coordinate) => ({ x: c.x, y: c.y + 1 }),
-  left: (c: Coordinate) => ({ x: c.x - 1, y: c.y }),
-  right: (c: Coordinate) => ({ x: c.x + 1, y: c.y }),
-  upLeft: (c: Coordinate) => ({ x: c.x - 1, y: c.y - 1 }),
-  upRight: (c: Coordinate) => ({ x: c.x + 1, y: c.y - 1 }),
-  downLeft: (c: Coordinate) => ({ x: c.x - 1, y: c.y + 1 }),
-  downRight: (c: Coordinate) => ({ x: c.x + 1, y: c.y + 1 }),
+  up: (c: Coordinate, d: number = 1) => ({ x: c.x, y: c.y - d }),
+  down: (c: Coordinate, d: number = 1) => ({ x: c.x, y: c.y + d }),
+  left: (c: Coordinate, d: number = 1) => ({ x: c.x - d, y: c.y }),
+  right: (c: Coordinate, d: number = 1) => ({ x: c.x + d, y: c.y }),
+  upLeft: (c: Coordinate, d: number = 1) => ({ x: c.x - d, y: c.y - d }),
+  upRight: (c: Coordinate, d: number = 1) => ({ x: c.x + d, y: c.y - d }),
+  downLeft: (c: Coordinate, d: number = 1) => ({ x: c.x - d, y: c.y + d }),
+  downRight: (c: Coordinate, d: number = 1) => ({ x: c.x + d, y: c.y + d }),
 };
