@@ -13,17 +13,15 @@ const toggle = {
 /* CHALLENGE 1 */
 export function solve1(input: string[]) {
   const modules = parseInput(input);
-  console.log(modules);
-  // return;
 
   let highPulses = 0,
     lowPulses = 0;
-  for (let pushes = 0; pushes < 1000; pushes++) {
+  for (let pushes = 1; pushes < Infinity; pushes++) {
     const signals: { type: "high" | "low"; from: string; to: string }[] = [];
     signals.push({ type: "low", from: "button", to: "broadcaster" });
+    const rxPressed = [];
     while (signals.length > 0) {
       let signal = signals.shift()!;
-      console.log("Received signal:", signal);
 
       if (signal.type === "high") {
         highPulses++;
@@ -31,9 +29,12 @@ export function solve1(input: string[]) {
         lowPulses++;
       }
 
+      if (signal.to === "rx") {
+        rxPressed.push(signal.type);
+      }
+
       let currModule = modules[signal.to];
       if (!currModule) {
-        console.log("NOT FOUND", signal.to);
         continue;
       }
 
@@ -52,6 +53,8 @@ export function solve1(input: string[]) {
           const newState =
             signal.type === "low" ? toggle[currModule.state] : currModule.state;
           if (currModule.state === "off" && newState === "on") {
+            currModule.cycleLength =
+              currModule.cycleLength < 0 ? pushes : currModule.cycleLength;
             signals.push(
               ...currModule.to.map(
                 (t) =>
@@ -74,6 +77,10 @@ export function solve1(input: string[]) {
           )
             ? "low"
             : "high";
+
+          if (inputState === "high" && currModule.cycleLength < 0) {
+            currModule.cycleLength = pushes;
+          }
           signals.push(
             ...currModule.to.map(
               (t) =>
@@ -82,18 +89,85 @@ export function solve1(input: string[]) {
           );
       }
     }
-    // break;
+    if (
+      Object.values(modules)
+        .filter((m) => m.type === "&" && m.from !== "dd")
+        .every((m: Conjunction) => m.cycleLength > 0)
+    ) {
+      break;
+    }
+    if (rxPressed.includes("low")) {
+      return pushes;
+    }
+    if (rxPressed.length === 1 && rxPressed[0] === "low") {
+      return pushes;
+    }
+  }
+  printModules("dd", modules);
+  const ddMod = modules["dd"] as Conjunction;
+  const cycleLengths = Object.keys(ddMod.inputs).map(
+    (m) => (modules[m] as FlipFlop | Conjunction).cycleLength,
+  );
+  const cycleLength = cycleLengths.reduce(...__reducers.lcm);
+  console.log(cycleLengths, cycleLength);
+  // calcCycleLength(modules["dd"] as Conjuction, modules);
+
+  return highPulses * lowPulses;
+}
+
+const printed = new Set<string>();
+function printModules(module: string, modules: Record<string, Module>) {
+  const curr = modules[module];
+  if (!curr || printed.has(module)) {
+    return;
   }
 
-  console.log("");
-  console.log(highPulses, lowPulses, highPulses * lowPulses);
-  return highPulses * lowPulses;
+  console.log(curr);
+  printed.add(module);
+
+  const toThis = Object.values(modules).filter((m) =>
+    m.to.includes(module),
+  ) as Module[];
+
+  for (const m of toThis) {
+    printModules(m.from, modules);
+  }
+}
+
+function calcCycleLength(conj: Conjunction, modules: Record<string, Module>) {
+  if (conj.cycleLength > 0) {
+    return conj.cycleLength;
+  }
+
+  if (
+    Object.keys(conj.inputs).every(
+      (m) => (modules[m] as FlipFlop | Conjunction).cycleLength > 0,
+    )
+  ) {
+    conj.cycleLength = Object.keys(conj.inputs)
+      .map((m) => (modules[m] as FlipFlop | Conjunction).cycleLength)
+      .reduce(...__reducers.lcm);
+    return conj.cycleLength;
+  }
+
+  for (const m of Object.keys(conj.inputs)) {
+    if (
+      modules[m].type === "&" &&
+      (modules[m] as Conjunction).cycleLength < 0
+    ) {
+      calcCycleLength(modules[m] as Conjunction, modules);
+    }
+  }
+
+  conj.cycleLength = Object.keys(conj.inputs)
+    .map((m) => (modules[m] as FlipFlop | Conjunction).cycleLength)
+    .reduce(...__reducers.lcm);
+  return conj.cycleLength;
 }
 
 /* CHALLENGE 2 */
 export function solve2(input: string[]) {
   const parsedInput = parseInput(input);
-  // console.log(parsedInput);
   const {} = parsedInput;
 
   return 42;
@@ -113,25 +187,26 @@ type FlipFlop = {
   from: string;
   to: string[];
   state: "on" | "off";
+  cycleLength: number;
 };
 
-type Conjuction = {
+type Conjunction = {
   type: "&";
   from: string;
   to: string[];
   inputs: {
     [m: string]: "high" | "low";
   };
+  cycleLength: number;
 };
 
-type Module = Broadcaster | FlipFlop | Conjuction;
+type Module = Broadcaster | FlipFlop | Conjunction;
 
 function parseInput(input: string[]) {
   const mods = input
     .map((r) => r.split(" -> "))
     .filter((l) => l.length > 1)
     .map(([from, to]) => {
-      console.log("From: ", from, "To: ", to);
       return {
         from,
         to: to.split(", "),
@@ -143,6 +218,7 @@ function parseInput(input: string[]) {
       to,
       state: from[0] === "%" ? "off" : "",
       inputs: from[0] === "&" ? [] : undefined,
+      cycleLength: -1,
     }))
     .reduce(
       (acc, module) => ({
@@ -155,7 +231,7 @@ function parseInput(input: string[]) {
     if (m.type === "%") {
       for (const t of m.to) {
         if (mods[t].type === "&") {
-          (mods[t] as Conjuction).inputs[m.from] = "low";
+          (mods[t] as Conjunction).inputs[m.from] = "low";
         }
       }
     }
