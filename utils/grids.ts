@@ -112,8 +112,8 @@ export function createGrid(
   );
 }
 
-export function print(grid: any[][]) {
-  console.log(grid.map((r) => r.join("")).join("\n"));
+export function print(grid: any[][], delim: string = " ") {
+  console.log(grid.map((r) => r.join(delim)).join("\n"));
 }
 
 export const move = {
