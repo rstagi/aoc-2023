@@ -61,6 +61,7 @@ export function solve1(input: string[]) {
   console.log(oddGrids, evenGrids, oddCount, evenCount, L);
 
   return (
+    countReachable(startPos, MAX_DIST, grid) +
     evenCount * evenGrids +
     oddCount * oddGrids +
     cornerTop +
