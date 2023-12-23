@@ -1,5 +1,5 @@
 /// <reference path="../types/globals.d.ts" />
-// Note; gets trimmed
+// Note: gets trimmed
 export const inputs = [
   `
 `,

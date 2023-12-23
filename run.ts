@@ -1,4 +1,5 @@
 import { formatDay, getLastDayFromDir } from "./utils/aoc";
+import * as _util from "node:util";
 
 const dayName = process.argv[2] ?? formatDay(getLastDayFromDir());
 
@@ -8,16 +9,21 @@ const answers = {
 };
 
 declare global {
+  var util: typeof _util;
   var getInput: (index: number) => string;
   var sol1: (solution: number) => void;
   var sol2: (solution: number) => void;
 }
 
+global.util = _util;
+
 global.sol1 = (sol: number) => {
+  console.info("Solved part 1:", sol);
   answers.part1 = sol;
 };
 
 global.sol2 = (sol: number) => {
+  console.info("Solved part 2:", sol);
   answers.part2 = sol;
 };
 
