@@ -5,9 +5,31 @@ import * as __math from "../utils/math";
 import * as __arrays from "../utils/arrays";
 import * as __grids from "../utils/grids";
 
-/* CHALLENGE 1 */
-export function solve1(input: string[]) {
-  const { rules, workflows } = parseInput(input);
+export const inputs = [
+  `
+px{a<2006:qkq,m>2090:A,rfg}
+pv{a>1716:R,A}
+lnx{m>1548:A,A}
+rfg{s<537:gd,x>2440:R,A}
+qs{s>3448:A,lnx}
+qkq{x<1416:A,crn}
+crn{x>2662:A,R}
+in{s<1351:px,qqz}
+qqz{s>2770:qs,m<1801:hdj,R}
+gd{a>3333:R,R}
+hdj{m>838:A,pv}
+
+{x=787,m=2655,a=1222,s=2876}
+{x=1679,m=44,a=2067,s=496}
+{x=2036,m=264,a=79,s=2244}
+{x=2461,m=1339,a=466,s=291}
+{x=2127,m=1623,a=2188,s=1013}
+`,
+];
+
+export function main() {
+  // Part 1
+  const { rules, workflows } = parseInput(getInput(0).split("\n"));
 
   let sum = 0;
   for (const workflow of workflows) {
@@ -31,13 +53,9 @@ export function solve1(input: string[]) {
     }
   }
 
-  return sum;
-}
+  sol1(sum);
 
-/* CHALLENGE 2 */
-export function solve2(input: string[]) {
-  const { rules } = parseInput(input);
-
+  // Part 2
   const rangesToA: Record<Variable, { min: number; max: number }> = {
     x: { min: 1, max: 4000 },
     m: { min: 1, max: 4000 },
@@ -48,7 +66,6 @@ export function solve2(input: string[]) {
   const ranges: Ranges[] = [];
   findRanges("in", rangesToA, ranges, rules);
 
-  console.log(ranges);
   let combinations = 0;
   for (const range of ranges) {
     combinations +=
@@ -58,7 +75,7 @@ export function solve2(input: string[]) {
       (range.s.max - range.s.min + 1);
   }
 
-  return combinations;
+  sol2(combinations);
 }
 
 type Ranges = Record<Variable, { min: number; max: number }>;
@@ -133,7 +150,6 @@ type Rule = {
   fallback: string;
 };
 
-// Parse the input into a usable format. An example of input is provided below in the __forceInput.input variable.
 function parseInput(input: string[]) {
   const rules: Record<string, Rule> = {};
   for (let i = 0; i < input.length; i++) {
@@ -168,26 +184,3 @@ function parseInput(input: string[]) {
 
   return { rules, workflows };
 }
-
-export const __forceInput = {
-  // force: true,
-  input: `
-px{a<2006:qkq,m>2090:A,rfg}
-pv{a>1716:R,A}
-lnx{m>1548:A,A}
-rfg{s<537:gd,x>2440:R,A}
-qs{s>3448:A,lnx}
-qkq{x<1416:A,crn}
-crn{x>2662:A,R}
-in{s<1351:px,qqz}
-qqz{s>2770:qs,m<1801:hdj,R}
-gd{a>3333:R,R}
-hdj{m>838:A,pv}
-
-{x=787,m=2655,a=1222,s=2876}
-{x=1679,m=44,a=2067,s=496}
-{x=2036,m=264,a=79,s=2244}
-{x=2461,m=1339,a=466,s=291}
-{x=2127,m=1623,a=2188,s=1013}
-`.trim(),
-};

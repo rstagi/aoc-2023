@@ -1,5 +1,26 @@
-/* CHALLENGE 1 */
-function solve1(input) {
+export const inputs = [
+  `
+Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
+Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
+Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
+Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
+Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
+Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
+`,
+  `
+Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
+Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
+Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
+Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
+Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
+Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
+`,
+];
+
+export function main() {
+  const input = getInput(0).split("\n");
+
+  // Part 1
   let total = 0;
   for (const line of input) {
     let totLine = 0;
@@ -30,12 +51,10 @@ function solve1(input) {
     total += totLine;
   }
 
-  return total;
-}
+  sol1(total);
 
-/* CHALLENGE 2 */
-function solve2(input) {
-  let total = 0;
+  // Part 2
+  total = 0;
 
   const multipliers = input.filter((l) => l).map(() => 1);
   for (let i = 0; i < input.length; i++) {
@@ -73,7 +92,5 @@ function solve2(input) {
       multipliers[j] += multipliers[i];
     }
   }
-  return Object.values(multipliers).reduce((sum, n) => sum + n, 0);
+  sol2(Object.values(multipliers).reduce((sum, n) => sum + n, 0));
 }
-
-module.exports = { solve1, solve2 };

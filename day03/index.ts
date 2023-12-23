@@ -1,20 +1,32 @@
-/* CHALLENGE 1 */
-function solve1(input: string[]) {
+export const inputs = [
+  `
+467..114..
+...*......
+..35..633.
+......#...
+617*......
+.....+.58.
+..592.....
+......755.
+...$.*....
+.664.598..
+`,
+];
+
+export function main() {
+  const input = getInput(0).split("\n");
   const { numbers, symbols } = parseInput(input);
 
+  // Part 1
   const symbolsAroundLine = (index) => elementsAroundLine(index, symbols);
   const withSymbolsAround = (number) =>
     symbolsAroundLine(number.line).some(isAround(number.range));
 
   const parts = numbers.filter(withSymbolsAround);
 
-  return parts.reduce(sum("value"), 0);
-}
+  sol1(parts.reduce(sum("value"), 0));
 
-/* CHALLENGE 2 */
-function solve2(input) {
-  const { symbols, numbers } = parseInput(input);
-
+  // Part 2
   const numbersAroundLine = (index) => elementsAroundLine(index, numbers);
   const addCloseNumbers = (symbolInfo) => ({
     ...symbolInfo,
@@ -29,7 +41,7 @@ function solve2(input) {
     .filter(isGear)
     .map(calcRatio);
 
-  return gears.reduce(sum("ratio"), 0);
+  sol2(gears.reduce(sum("ratio"), 0));
 }
 
 function hasGearSymbol(symbolInfo) {
@@ -117,5 +129,3 @@ function isAround([start, end]) {
 function isPosAroundRange(pos, [start, end]) {
   return start - 1 <= pos && pos <= end + 1;
 }
-
-module.exports = { solve1, solve2 };
