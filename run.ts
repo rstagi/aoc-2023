@@ -54,7 +54,7 @@ function runWithProblemInput() {
 }
 
 const { npm_config_custom_only, npm_config_problem_only } = process.env;
-const { inputs, main } = require(`./${dayName}/index.ts`);
+const { inputs, main } = require(`./${dayName}/index.js`);
 
 console.log(`Running ${dayName}...`);
 

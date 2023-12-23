@@ -13,7 +13,8 @@
     "allowUnusedLabels": true,                        /* Disable error reporting for unused labels. */
     "allowUnreachableCode": true,                     /* Disable error reporting for unreachable code. */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
-    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
+    "outDir": "./dist"                                 /* Redirect output structure to the directory. */
   },
   "include": [
     "**/*"

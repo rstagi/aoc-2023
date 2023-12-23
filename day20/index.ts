@@ -5,14 +5,26 @@ import * as __math from "../utils/math";
 import * as __arrays from "../utils/arrays";
 import * as __grids from "../utils/grids";
 
+export const inputs = [
+  `
+broadcaster -> a
+%a -> inv, con
+&inv -> b
+%b -> con
+&con -> output
+`,
+];
+
 const toggle = {
   off: "on",
   on: "off",
 } as const;
 
-/* CHALLENGE 1 */
-export function solve1(input: string[]) {
+export function main() {
+  const input = getInput(0).split("\n");
   const modules = parseInput(input);
+
+  // WARN: It doesn't work with the custom solution above, it needs to be refactored (sorry)
 
   let highPulses = 0,
     lowPulses = 0;
@@ -110,9 +122,8 @@ export function solve1(input: string[]) {
   );
   const cycleLength = cycleLengths.reduce(...__reducers.lcm);
   console.log(cycleLengths, cycleLength);
-  // calcCycleLength(modules["dd"] as Conjuction, modules);
 
-  return highPulses * lowPulses;
+  sol2(highPulses * lowPulses);
 }
 
 const printed = new Set<string>();
@@ -163,14 +174,6 @@ function calcCycleLength(conj: Conjunction, modules: Record<string, Module>) {
     .map((m) => (modules[m] as FlipFlop | Conjunction).cycleLength)
     .reduce(...__reducers.lcm);
   return conj.cycleLength;
-}
-
-/* CHALLENGE 2 */
-export function solve2(input: string[]) {
-  const parsedInput = parseInput(input);
-  const {} = parsedInput;
-
-  return 42;
 }
 
 /* SHARED */
@@ -238,14 +241,3 @@ function parseInput(input: string[]) {
   }
   return mods;
 }
-
-export const __forceInput = {
-  // force: true,
-  input: `
-broadcaster -> a
-%a -> inv, con
-&inv -> b
-%b -> con
-&con -> output
-`.trim(),
-};
