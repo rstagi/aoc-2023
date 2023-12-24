@@ -21,7 +21,7 @@ export function insertSorted<T>(
 
 export function makePairs<T>(src: T[]): [T, T][] {
   const pairs = [];
-  for (let i = 0; i < src.length; i++) {
+  for (let i = 0; i < src.length - 1; i++) {
     for (let j = i + 1; j < src.length; j++) {
       pairs.push([src[i], src[j]]);
     }

@@ -11,6 +11,7 @@ const answers = {
 declare global {
   var util: typeof _util;
   var getInput: (index: number) => string;
+  var isCustomMode: () => boolean;
   var sol1: (solution: number) => void;
   var sol2: (solution: number) => void;
 }
@@ -27,12 +28,18 @@ global.sol2 = (sol: number) => {
   answers.part2 = sol;
 };
 
+let runningInCustomMode: boolean;
+global.isCustomMode = (): boolean => {
+  return runningInCustomMode;
+};
+
 /**
  * Runs the solution with the custom input.
  */
 function runWithCustomInput() {
   console.log("\nUsing custom input:");
   global.getInput = (index: number) => inputs[index].trim();
+  runningInCustomMode = true;
   main();
 }
 
@@ -48,6 +55,7 @@ function runWithProblemInput() {
 
   global.getInput = (_index: number) =>
     require("fs").readFileSync(`./${dayName}/input.txt`, "utf8").trim();
+  runningInCustomMode = false;
   main();
 
   console.log = log;
